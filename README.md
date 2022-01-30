@@ -1,10 +1,4 @@
 # rt1_assignment3
-Contains my work for the final assignment of the Research Track 1 class
-
-git clone -b <your-distro-branch> https://www.github.com/CarmineD8/final_assignment
-git clone https://www.github.com/CarmineD8/slam_gmapping
-sudo apt-get update
-sudo apt-get install ros-noetic-teleop-twist-keyboard
 
 ## Introduction
 This package is an answer to the third assignement for the Research Track 1 class, for the first year of the Robotics Engineering degree at UniGe, in 2021-2022. The assignment consists in writing a ROS package to choose and control the motion of a robot in a given simulated environment.
