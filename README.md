@@ -41,6 +41,7 @@ rosservice call <name_of_service> <request>
 The available services are
 - /switch_mode : change the running mode between 1 - automatic, 2 - manual and 3 - manual with assistance
 - /set_goal : in mode 1, defines the goal to be reach (pair of float)
+
 To write the request, once you have written rosservice call <name_of_service>, press twice the tab key to have the message template. You can then fill it with the values you are interested in.
 
 ## ui_node
