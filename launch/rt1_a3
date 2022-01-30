@@ -1,16 +1,14 @@
 <?xml version="1.0"?>
 
 <launch>
-    <include file="$(find final_assignment)/launch/move_base.launch"/>
-    <include file="$(find final_assignment)/launch/simulation_gmapping.launch"/>
-
+    
     <node pkg="rt1_assignment3" type="ui_node" name="ui_node" output="screen" required = "true"/>
     <node pkg="rt1_assignment3" type="manual_node" name="manual_node" output="screen"/>
 
     <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard">
         <remap from="cmd_vel" to="manual_cmd_vel"/>
-        <param name="_repeat_rate" value="10.0"/>
-        <param name="_key_timeout" value="0.5"/>
+        <!--<param name="_repeat_rate" value="10.0"/>
+        <param name="_key_timeout" value="0.5"/>-->
     </node>
 
 </launch>

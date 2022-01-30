@@ -58,6 +58,9 @@ bool set_goal(rt1_assignment3::Goal::Request  &req, rt1_assignment3::Goal::Respo
     if (current_mode ==1){
 
         //update the new goal, regarless where this goal is in the map
+        ROS_INFO("request is x=%f and y=%f", req.x, req.y);
+        goal.target_pose.header.frame_id = "map";
+        goal.target_pose.pose.orientation.w = 1.;
         goal.target_pose.pose.position.x = req.x;
         goal.target_pose.pose.position.y = req.y;
         res.success = true;
@@ -90,8 +93,6 @@ int main(int argc, char **argv)
     
     //action client constructor with the server name to connect to and set to automatically spin a thread
     MoveBaseClient ac("move_base", true);
-    goal.target_pose.header.frame_id = "map";
-    goal.target_pose.pose.orientation.w = 1.;
 
     ros::Rate loop_rate(10);
 
@@ -106,19 +107,20 @@ int main(int argc, char **argv)
         if(current_mode ==1 and goal_is_defined){
 
             //sending information to the action server
+            ROS_INFO("Waiting for the server");
             ac.waitForServer();
-            goal.target_pose.header.stamp = ros::Time::now();
+            ROS_INFO("sending goal");
             ac.sendGoal(goal);
             ROS_INFO("Goal sent");
 
-            bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
+            bool finished_before_timeout = ac.waitForResult(ros::Duration(20.0));
 
             //If the action stopped before the timeout, check if the goal has been reached
             if (finished_before_timeout)
             {
                 actionlib::SimpleClientGoalState state = ac.getState();
                 ROS_INFO("Action finished: %s",state.toString().c_str());
-            }
+                            }
             //If the timeout stopped the action, the goal is cancelled
             else
             {
