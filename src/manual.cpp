@@ -14,26 +14,26 @@ float f_lft;
 float front;
 float f_rgt;
 
-
+// Current behavior
 int current_mode = 0;
 
+//Twist to be sent to gazebo
 geometry_msgs::Twist my_twist;
 
 ros::Publisher pub_twist;
 
+//update the current mode using the user interface broadcast
 void ModeCallBack(const std_msgs::Int32 &msg){
-    //update the current mode using the user interface broadcast
     current_mode = msg.data;
 }
 
-//get speed sent by teleop keyboard
+//get user defined twist sent by teleop keyboard
 void CmdCallBack(const geometry_msgs::Twist &msg)
 {
-    //Retrieves the value sent by teleop_twist_keyboard
     my_twist = msg;       
 }
 
-
+// Auxilliary function looking for the minimum in a given part of msg.ranges
 float min_sector(const sensor_msgs::LaserScan::ConstPtr& msg, int i, int j){
     float min = 100;
     float idx_min = i;
@@ -47,14 +47,13 @@ float min_sector(const sensor_msgs::LaserScan::ConstPtr& msg, int i, int j){
     return min;
 }
 
-//mode 3: collisison avoidance assistance, to be called by the cmdCallBack
+//mode 3: collisison avoidance assistance, to be called by the ScanCallBack
 void Assistance()
 {
     float safety_limit = 0.5;
-
     
     //if the robot is cmoser than the safety limit to the front wall
-    // then we stop ist forward motion
+    // then we stop its forward motion
     if (front < safety_limit and my_twist.linear.x > 0.0)
     {
         my_twist.linear.x =  0.0;
@@ -64,22 +63,22 @@ void Assistance()
     //  the robot is turned away from it
     if (f_lft < safety_limit)
     {
-        //my_twist.linear.x = 0.5*my_twist.linear.x;
-        my_twist.angular.z = -1.5; // go the other way
+        my_twist.angular.z = 1.5; // go the other way
         ROS_INFO("You are too close to the left wall!");
     }
     //If the robot is not to close to the left but is to close to the right
     // it is turned away from the right wall.
     else if (f_rgt < safety_limit)
     {
-        //my_twist.linear.x = 0.5*my_twist.linear.x;
-        my_twist.angular.z = +1.5; // go the other way
+        my_twist.angular.z = -1.5; // go the other way
         ROS_INFO("You are too close to the right wall!");
     }
     
 }
 
+//Callback for the LaserScan sensor
 void ScanCallBack(const sensor_msgs::LaserScan::ConstPtr& msg){
+
     //Treatment of the laser scan information only in mode 3
     if (current_mode == 3){
         int fifth;    
@@ -90,9 +89,11 @@ void ScanCallBack(const sensor_msgs::LaserScan::ConstPtr& msg){
         front = min_sector(msg, 2*fifth +1 , 3*fifth);
         f_rgt = min_sector(msg, 3*fifth +1 , 4*fifth);
 
+        //Apply correction
         Assistance();
     }
 
+    //Publish updated twist to gazebo
      pub_twist.publish(my_twist);
 }
 
@@ -102,7 +103,6 @@ void ScanCallBack(const sensor_msgs::LaserScan::ConstPtr& msg){
 int main(int argc, char **argv)
 {
     // Initialize the node, setup the NodeHandle for handling the communication with the ROS system
-
     ros::init(argc, argv, "manual_node");
     ros::NodeHandle nh;    
 
@@ -123,25 +123,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
-
-
-
-
-/* 
-Assignment 2 Assignment 2 Assignment 2 Assignment 2 Assignment 2
-float min_sector(const sensor_msgs::LaserScan::ConstPtr& msg, int i, int j){
-    float min = 100;
-    float idx_min = i;
-
-    for (int e=i; e<j; e++){
-        if (msg->ranges[e]<min){
-            min = msg->ranges[e];
-            idx_min = e;
-        }
-    }
-    return min;
-}
-
-Assignment 2 Assignment 2 Assignment 2 Assignment 2 Assignment 2
-*/

@@ -1,20 +1,17 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
-
-
 #include <string.h>
 
 //services needed
 #include "rt1_assignment3/BehaviorMode.h"
 #include "rt1_assignment3/Goal.h"
+#include <actionlib_msgs/GoalID.h>
 
 //messages needed
 #include "std_msgs/Int32.h"
 #include <move_base_msgs/MoveBaseAction.h>
 
 #include <actionlib/client/simple_action_client.h>
-#include <actionlib_msgs/GoalID.h>
-
 
 
 //initialise the current mode to 0 : no mode selected
@@ -30,7 +27,6 @@ bool goal_is_defined = false;
 ros::Publisher pub_mode;
 ros::Publisher pub_cancel;
 
-   
 
 //service to change mode
 bool switch_mode(rt1_assignment3::BehaviorMode::Request  &req, rt1_assignment3::BehaviorMode::Response &res){
@@ -40,7 +36,25 @@ bool switch_mode(rt1_assignment3::BehaviorMode::Request  &req, rt1_assignment3::
         current_mode = req.mode;
         res.success = true;
         ROS_INFO("The current mode is now %d ", current_mode);
+
+        //Different message according to the mode
+        if (current_mode ==2 or current_mode==3){
+            printf("\nKeys to control the robot:\n"
+                    "---------------------------\n"
+                    "Moving around:\n"
+                    "u    i    o\n"
+                    "j    k    l\n"
+                    "m    ,    .\n"
+
+                    "q/z : increase/decrease max speeds by 10 percent\n"
+                    "w/x : increase/decrease only linear speed by 10 percent\n"
+                    "e/c : increase/decrease only angular speed by 10 percent\n"
+                    "anything else : stop\n");
+        }else{
+            printf("\nTo set a goal, call the service /set_goal\n");
+        }
     }
+    //An invalid interger will no affect the system
     else{
         res.success = false;
         ROS_INFO("Please enter an existing mode, i.e. 1, 2 or 3");
@@ -70,7 +84,7 @@ bool set_goal(rt1_assignment3::Goal::Request  &req, rt1_assignment3::Goal::Respo
     }
     else{
         res.success = false;
-        ROS_INFO("Please remember that the goal definition only makes sense if mode 1 is active");
+        ROS_INFO("Goal definition is only for mode 1");
     }
 
     return true;
@@ -96,6 +110,14 @@ int main(int argc, char **argv)
 
     ros::Rate loop_rate(10);
 
+    ROS_INFO("Current active mode: %d", current_mode);
+    printf("\nThere are three available modes:\n"
+            "1 - automatic planning and motion to a set goal\n"
+            "2 - manual control\n"
+            "3 - manual control with assitance to avoid collisions\n"
+            "to switch, call the service /switch_mode\n"
+            );
+
     while (ros::ok())
     {
         //Indicating the mode the the other nodes 
@@ -109,11 +131,11 @@ int main(int argc, char **argv)
             //sending information to the action server
             ROS_INFO("Waiting for the server");
             ac.waitForServer();
-            ROS_INFO("sending goal");
+            ROS_INFO("Sending goal");
             ac.sendGoal(goal);
             ROS_INFO("Goal sent");
 
-            bool finished_before_timeout = ac.waitForResult(ros::Duration(20.0));
+            bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
 
             //If the action stopped before the timeout, check if the goal has been reached
             if (finished_before_timeout)
@@ -140,8 +162,7 @@ int main(int argc, char **argv)
         
     }
 
-    return 0;
-    
+    return 0;    
   
 }
 
