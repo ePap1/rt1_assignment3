@@ -1,3 +1,28 @@
+/**
+* \file user_interface.cpp
+* \brief User interface implementing a the services server
+* \author Eléa Papin
+* \version 1.0
+* \date 12/03/2022
+*
+* \details
+*
+* Publishes to: <BR>
+* ° /current_mode
+* ° /move_base_goal
+*
+* Services: <BR>
+* ° /switch_mode
+* ° /set_goal*
+*
+* Description :
+* This node handles the two services with which the user can communicate with the simulation.
+* It updates the running mode via /switch_mode and broadcast it to the manual_node on /current_mode.
+* It also relays the goal request sent by the user on /set_goal to the action client using /move_base/goal.
+*
+* 
+**/
+
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include <string.h>
@@ -15,10 +40,11 @@
 
 
 //initialise the current mode to 0 : no mode selected
-int current_mode = 0;
+int current_mode = 0; ///< User defined behavior mode
+
 
 //Prepare the goal to be sent
-typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient; ///< Action client for move base
 move_base_msgs::MoveBaseGoal goal;
 
 bool goal_is_defined = false;
@@ -29,6 +55,15 @@ ros::Publisher pub_cancel;
 
 
 //service to change mode
+/**
+* \brief implements the service /switch_mode.
+* \param req is a rt1_assignment3/BehaviorMode/Request argument
+* \param res is a rt1_assignment3/BehaviorMode/Response argument
+* \return Returns true
+*
+* This service gets an integer corresponding to a desired behavior mode as request. This integer- must be 1, 2 or 3.
+* When the mode is manual, aka 2 or 3, control instructions are provided
+*/
 bool switch_mode(rt1_assignment3::BehaviorMode::Request  &req, rt1_assignment3::BehaviorMode::Response &res){
    
     //The request is of type int32 (by definition of the service), there is no need to check the type
@@ -65,6 +100,16 @@ bool switch_mode(rt1_assignment3::BehaviorMode::Request  &req, rt1_assignment3::
 
 
 //service to set goal
+
+/**
+* \brief implements the service /set_goal.
+* \param req is a rt1_assignment3/Goal/Request argument
+* \param res is a rt1_assignment3/Goal/Response argument
+* \return Returns true
+*
+* This service gets a couple of floats corresponding to a desired goal for the robot to reach.
+* The fields of the global variable goal of move_base_msgs/MoveBaseGoal are filled there.
+*/
 bool set_goal(rt1_assignment3::Goal::Request  &req, rt1_assignment3::Goal::Response &res){
      goal_is_defined = false;
     
