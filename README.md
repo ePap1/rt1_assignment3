@@ -45,7 +45,7 @@ The available services are
 To write the request, once you have written rosservice call <name_of_service>, press twice the tab key to have the message template. You can then fill it with the values you are interested in.
 
 ## Full documentation
-Get the full [documentation](https://epap1.github.io/rt1_assignment3/) here.
+Get the full documentation [here](https://epap1.github.io/rt1_assignment3/).
 
 ## ui_node
 
