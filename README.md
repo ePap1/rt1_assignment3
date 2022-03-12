@@ -44,6 +44,9 @@ The available services are
 
 To write the request, once you have written rosservice call <name_of_service>, press twice the tab key to have the message template. You can then fill it with the values you are interested in.
 
+## Full documentation
+Get the full [documentation](https://epap1.github.io/rt1_assignment3/) here.
+
 ## ui_node
 
 This node handles the two services with which the user can communicate with the simulation. It updates the running mode via `/switch_mode` and broadcast it to the manual_node on `/current_mode`. It also relays the goal request sent by the user on `/set_goal` to the action client using `/move_base/goal`.
