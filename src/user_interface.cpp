@@ -52,6 +52,7 @@ bool goal_is_defined = false;
 
 ros::Publisher pub_mode;
 ros::Publisher pub_cancel;
+ros::Publisher pub_success;
 
 
 //service to change mode
@@ -149,6 +150,7 @@ int main(int argc, char **argv)
     ros::ServiceServer service_goal = nh.advertiseService("/set_goal", set_goal);
     pub_cancel = nh.advertise<actionlib_msgs::GoalID>("move_base/cancel", 1);
     pub_mode = nh.advertise<std_msgs::Int32>("/current_mode",1); 
+    pub_success = nh.advertise<std_msgs::Int32>("/goal_reached",1);
     
     //action client constructor with the server name to connect to and set to automatically spin a thread
     MoveBaseClient ac("move_base", true);
@@ -169,6 +171,10 @@ int main(int argc, char **argv)
         std_msgs::Int32 msg_mode;
         msg_mode.data = current_mode;  
         pub_mode.publish(msg_mode);
+
+        
+        std_msgs::Int32 goal_state;
+        goal_state.data = 0;
         
         //Handling of automatic mode
         if(current_mode ==1 and goal_is_defined){
@@ -180,27 +186,32 @@ int main(int argc, char **argv)
             ac.sendGoal(goal);
             ROS_INFO("Goal sent");
 
-            bool finished_before_timeout = ac.waitForResult(ros::Duration(30.0));
+            bool finished_before_timeout = ac.waitForResult(ros::Duration(20.0));
 
             //If the action stopped before the timeout, check if the goal has been reached
             if (finished_before_timeout)
             {
                 actionlib::SimpleClientGoalState state = ac.getState();
                 ROS_INFO("Action finished: %s",state.toString().c_str());
-                            }
+                if (state.isDone()){goal_state.data = 1;}
+                else {goal_state.data = 2;}
+            }
+
             //If the timeout stopped the action, the goal is cancelled
             else
             {
                 ROS_INFO("The goal could not be reached in the alloted time : cancellation");
                 auto msg = actionlib_msgs::GoalID();
+                goal_state.data = 2;
                 pub_cancel.publish(msg);
             }
 
             //In all cases, the goal has to be redefined
-            goal_is_defined = false;   
-        }
             
-                
+			pub_success.publish(goal_state);        
+            goal_is_defined = false;   
+        }    
+        
         ros::spinOnce();
 
         loop_rate.sleep();
