@@ -1,7 +1,7 @@
 # rt1_assignment3
 
 ## Edit
-The work for RT2 first assignment has been added to this repository, since it reuses the RT1 third assignment
+The work for RT2 first assignment has been added to this repository, since it reuses the RT1 third assignment. It can be found in the folder RT2_assignment1.
 
 ## Introduction
 This package is an answer to the third assignement for the Research Track 1 class, for the first year of the Robotics Engineering degree at UniGe, in 2021-2022. The assignment consists in writing a ROS package to choose and control the motion of a robot in a given simulated environment.
